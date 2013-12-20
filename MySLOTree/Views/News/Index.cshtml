@@ -1,0 +1,72 @@
+﻿@model MySLOTree.Models.NewsListModel
+
+@{
+    ViewBag.Title = "MySLO Tree";
+}
+<div class="center"><h1>MySLO Tree</h1></div>
+
+@if (!Model.News.Any())
+{
+    <div class="text_center">
+        No nodes found. 
+        <a href="#" onclick="openAdd()">Add</a> a first node.
+    </div>
+}
+else
+{
+    <div class="margin_center">
+        <div>
+            <div class="add_root inline" title="Add" onclick="openAdd()">
+            </div> 
+            <div class="drop inline root">
+                To root
+            </div>   
+        </div>
+        @Html.Partial("_TreeList", Model)
+    </div>
+}
+
+<div class="center">&copy;Revkov Alexander @DateTime.Now.Year</div>
+
+@using(Html.BeginForm("Move","News",FormMethod.Post,new {id="MoveForm", @class="no_display"}))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="newParentId" name="newParentId" />
+    <input type="hidden" id="nodeId" name="nodeId" />
+}
+
+<div id="overlay" class="no_display">
+<div class="overlay"></div>
+    <div class="panel_surface">
+    <div class="panel">
+        @using (Html.BeginForm("Add", "News", FormMethod.Post, new { id = "AddForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <span style="font-weight:bold; font-size:16px;">Title</span>
+            <input type="hidden" id="parentId" name="parentId" />
+            <input id="title" name="title" type="text" autocomplete="off" />
+            <div style="display:inline;">
+                <button type="button" onclick="checkAndAdd()">Add</button>
+                <button type="button" onclick="$('#overlay').hide();">Close</button>
+            </div>
+        }
+    </div>
+        </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('a.drag').draggable({ helper: 'clone' });
+            $('div.drop').droppable({ 
+                hoverClass: 'droppable-hover',
+                drop: function (event, ui) {
+                    $('#newParentId').val($(this).attr('parent-id'));
+                    $('#nodeId').val($(ui.draggable).attr('node-id'));
+                    $('#MoveForm').submit();
+                }
+            });
+        });
+    </script>
+}
